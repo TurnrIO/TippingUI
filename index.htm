@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Tip Selection</title>
+
+  <style>
+    :root {
+      --primary: #2aa6d6;
+      --border: #d9d9d9;
+      --bg: #f5f6f7;
+      --text-muted: #8c8c8c;
+      --shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      --shadow-strong: 0 16px 40px rgba(0, 0, 0, 0.20);
+      --success: #28a745;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 14px;
+    }
+
+    .container {
+      background: #fff;
+      width: 100%;
+      max-width: 420px;
+      padding: 24px 16px 28px;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+    }
+
+    .tip-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .tip-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 10px;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+
+    .tip-card:active {
+      transform: scale(0.97);
+    }
+
+    .tip-card.selected {
+      border-color: rgba(42, 166, 214, 0.55);
+      box-shadow: 0 0 0 3px rgba(42, 166, 214, 0.15);
+    }
+
+    .tip-percent {
+      color: var(--primary);
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .tip-amount {
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    .custom-tip {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 12px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--primary);
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+
+    .custom-tip:active {
+      transform: scale(0.98);
+    }
+
+    /* --- Modal / Sheet primitives --- */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 18px 14px;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 999;
+    }
+
+    .overlay.show {
+      display: flex;
+    }
+
+    .sheet {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: var(--shadow-strong);
+      overflow: hidden;
+      transform: translateY(16px);
+      opacity: 0;
+      transition: transform 0.18s ease, opacity 0.18s ease;
+    }
+
+    .overlay.show .sheet {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .sheet-header {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      text-align: center;
+    }
+
+    .sheet-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #222;
+      margin: 0;
+    }
+
+    .sheet-sub {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .sheet-body {
+      padding: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 10px;
+    }
+
+    .money-input {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+
+    .money-prefix {
+      font-weight: 700;
+      color: #222;
+      font-size: 18px;
+    }
+
+    input[type="number"] {
+      appearance: none;
+      -webkit-appearance: none;
+      border: none;
+      outline: none;
+      width: 100%;
+      font-size: 18px;
+      padding: 0;
+      background: transparent;
+      color: #222;
+    }
+
+    .sheet-actions {
+      display: grid;
+      gap: 10px;
+      padding: 0 16px 16px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 14px 14px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .btn:active {
+      transform: scale(0.99);
+    }
+
+    .btn-secondary {
+      background: rgba(0, 0, 0, 0.06);
+      color: #222;
+    }
+
+    /* --- Waiting screen (merchant device) --- */
+    .wait-row {
+      display: grid;
+      gap: 14px;
+      text-align: center;
+      padding: 16px;
+    }
+
+    .wait-amount {
+      font-size: 28px;
+      font-weight: 700;
+      color: #111;
+      letter-spacing: -0.2px;
+    }
+
+    .wait-label {
+      margin-top: -6px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .status {
+      display: grid;
+      justify-items: center;
+      gap: 10px;
+      padding: 14px 12px;
+      border-radius: 14px;
+      background: rgba(0, 0, 0, 0.04);
+      user-select: none;
+    }
+
+    .status-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #111;
+    }
+
+    .status-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.35;
+      max-width: 30ch;
+    }
+
+    .pulse {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      position: relative;
+      background: rgba(42, 166, 214, 0.18);
+      display: grid;
+      place-items: center;
+      overflow: visible;
+    }
+
+    .pulse::before,
+    .pulse::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid rgba(42, 166, 214, 0.35);
+      transform: scale(1);
+      opacity: 1;
+      animation: pulse 1.6s ease-out infinite;
+    }
+
+    .pulse::after {
+      animation-delay: 0.8s;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.9; }
+      100% { transform: scale(1.85); opacity: 0; }
+    }
+
+    .ap-mark {
+      font-weight: 800;
+      letter-spacing: -0.2px;
+      color: #000;
+      font-size: 14px;
+    }
+
+    /* --- Success check animation --- */
+    .success-badge {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(40, 167, 69, 0.14);
+      display: none;
+      place-items: center;
+      animation: pop 260ms ease-out;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.85); opacity: 0.4; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .check {
+      width: 30px;
+      height: 24px;
+    }
+
+    .check path {
+      stroke: var(--success);
+      stroke-width: 4.5;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 60;
+      stroke-dashoffset: 60;
+      animation: draw 420ms ease-out forwards;
+    }
+
+    @keyframes draw {
+      to { stroke-dashoffset: 0; }
+    }
+
+    .status.success .status-title {
+      color: #0f6b28;
+    }
+
+    /* --- Responsive tweaks --- */
+    @media (max-width: 375px) {
+      .tip-percent {
+        font-size: 24px;
+      }
+
+      .custom-tip {
+        font-size: 16px;
+      }
+
+      .wait-amount {
+        font-size: 26px;
+      }
+    }
+
+    /* Prevent iOS input zoom by keeping >=16px font-size */
+    input, button {
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container" role="application" aria-label="Tip selection">
+    <div class="tip-grid" aria-label="Preset tip options">
+      <div class="tip-card" data-tip="2.45" data-label="15%" role="button" tabindex="0" aria-label="Tip 15 percent, 2 euros 45 cents">
+        <div class="tip-percent">15%</div>
+        <div class="tip-amount">€2.45</div>
+      </div>
+      <div class="tip-card" data-tip="3.26" data-label="20%" role="button" tabindex="0" aria-label="Tip 20 percent, 3 euros 26 cents">
+        <div class="tip-percent">20%</div>
+        <div class="tip-amount">€3.26</div>
+      </div>
+      <div class="tip-card" data-tip="4.08" data-label="25%" role="button" tabindex="0" aria-label="Tip 25 percent, 4 euros 8 cents">
+        <div class="tip-percent">25%</div>
+        <div class="tip-amount">€4.08</div>
+      </div>
+    </div>
+
+    <div class="custom-tip" id="customTipBtn" role="button" tabindex="0" aria-label="Enter custom tip amount">
+      Custom Tip Amount
+    </div>
+  </div>
+
+  <!-- Custom Tip Sheet -->
+  <div class="overlay" id="customOverlay" aria-hidden="true">
+    <div class="sheet" role="dialog" aria-modal="true" aria-label="Custom tip">
+      <div class="sheet-header">
+        <p class="sheet-title">Custom Tip</p>
+        <p class="sheet-sub">Enter an amount and tap Accept</p>
+      </div>
+
+      <div class="sheet-body">
+        <div class="field">
+          <div class="money-input">
+            <span class="money-prefix">€</span>
+            <input
+              id="customAmount"
+              type="number"
+              inputmode="decimal"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              aria-label="Custom tip amount"
+            />
+          </div>
+          <div id="customError" style="display:none; color:#b00020; font-size:13px; text-align:left;">Please enter a valid amount.</div>
+        </div>
+      </div>
+
+      <div class="sheet-actions">
+        <button class="btn" id="acceptCustom" style="background: rgba(42,166,214,0.12); color: #127da8;">Accept</button>
+        <button class="btn btn-secondary" id="cancelCustom">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Waiting screen (merchant device) -->
+  <div class="overlay" id="waitOverlay" aria-hidden="true">
+    <div class="sheet" role="dialog" aria-modal="true" aria-label="Waiting for payer">
+      <div class="sheet-header">
+        <p class="sheet-title">Ready to accept</p>
+        <p class="sheet-sub" id="waitSub">Waiting for payer…</p>
+      </div>
+
+      <div class="wait-row">
+        <div>
+          <div class="wait-amount" id="waitAmount">€0.00</div>
+          <div class="wait-label">Tip Amount</div>
+        </div>
+
+        <!-- Hidden demo shortcut: rapid-tap this status card 5x to force success -->
+        <div class="status" id="statusCard" aria-live="polite">
+          <div class="pulse" id="pulse" aria-hidden="true">
+            <span class="ap-mark"> Pay</span>
+          </div>
+
+          <div class="success-badge" id="successBadge" aria-hidden="true">
+            <svg class="check" viewBox="0 0 52 40" focusable="false" aria-hidden="true">
+              <path d="M6 22 L20 36 L46 6"></path>
+            </svg>
+          </div>
+
+          <div class="status-title" id="statusTitle">Waiting for Apple Pay</div>
+          <div class="status-sub" id="statusSub">Have the payer use Apple Pay on their device to approve.</div>
+        </div>
+
+        <button class="btn btn-secondary" id="cancelWait">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Visual demo only (no real payment / no backend).
+
+    const tipCards = Array.from(document.querySelectorAll('.tip-card'));
+    const customTipBtn = document.getElementById('customTipBtn');
+
+    const customOverlay = document.getElementById('customOverlay');
+    const customAmount = document.getElementById('customAmount');
+    const customError = document.getElementById('customError');
+    const acceptCustom = document.getElementById('acceptCustom');
+    const cancelCustom = document.getElementById('cancelCustom');
+
+    const waitOverlay = document.getElementById('waitOverlay');
+    const waitAmount = document.getElementById('waitAmount');
+    const waitSub = document.getElementById('waitSub');
+    const cancelWait = document.getElementById('cancelWait');
+
+    const statusCard = document.getElementById('statusCard');
+    const statusTitle = document.getElementById('statusTitle');
+    const statusSub = document.getElementById('statusSub');
+    const pulse = document.getElementById('pulse');
+    const successBadge = document.getElementById('successBadge');
+
+    const eur = new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
+    function moneyEUR(n) {
+      const num = Number(n);
+      if (!Number.isFinite(num)) return eur.format(0);
+      return eur.format(num);
+    }
+
+    function show(el) {
+      el.classList.add('show');
+      el.setAttribute('aria-hidden', 'false');
+    }
+
+    function hide(el) {
+      el.classList.remove('show');
+      el.setAttribute('aria-hidden', 'true');
+    }
+
+    function clearSelection() {
+      tipCards.forEach(c => c.classList.remove('selected'));
+    }
+
+    function resetWaitUI() {
+      statusCard.classList.remove('success');
+      statusTitle.textContent = 'Waiting for Apple Pay';
+      statusSub.textContent = 'Have the payer use Apple Pay on their device to approve.';
+      pulse.style.display = 'grid';
+      successBadge.style.display = 'none';
+
+      // Reset the SVG animation by replacing its contents (small + reliable)
+      successBadge.innerHTML = `
+        <svg class="check" viewBox="0 0 52 40" focusable="false" aria-hidden="true">
+          <path d="M6 22 L20 36 L46 6"></path>
+        </svg>
+      `;
+    }
+
+    let waitTimer;
+    let closeTimer;
+
+    function closeWaitAndReset() {
+      clearTimeout(waitTimer);
+      clearTimeout(closeTimer);
+      hide(waitOverlay);
+      resetWaitUI();
+      clearSelection();
+      waitSub.textContent = 'Waiting for payer…';
+      // keep amount as-is; it will update next open
+    }
+
+    function showSuccessAndAutoClose() {
+      clearTimeout(waitTimer);
+      statusCard.classList.add('success');
+      pulse.style.display = 'none';
+      successBadge.style.display = 'grid';
+      statusTitle.textContent = 'Payment accepted';
+      statusSub.textContent = 'The tip was successfully received.';
+
+      // Auto-close and reset back to tip selection
+      clearTimeout(closeTimer);
+      closeTimer = setTimeout(() => {
+        closeWaitAndReset();
+      }, 2200);
+    }
+
+    function openWaiting(amount, label) {
+      clearTimeout(waitTimer);
+      clearTimeout(closeTimer);
+
+      waitAmount.textContent = moneyEUR(amount);
+      waitSub.textContent = label ? `Tip selected: ${label}` : 'Tip selected: Custom';
+      resetWaitUI();
+      show(waitOverlay);
+
+      // fake acceptance after a few seconds
+      waitTimer = setTimeout(() => {
+        showSuccessAndAutoClose();
+      }, 3200);
+    }
+
+    // --- Preset tips ---
+    tipCards.forEach(card => {
+      const activate = () => {
+        clearSelection();
+        card.classList.add('selected');
+        const amt = card.getAttribute('data-tip');
+        const label = card.getAttribute('data-label');
+        openWaiting(amt, label);
+      };
+
+      card.addEventListener('click', activate);
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          activate();
+        }
+      });
+    });
+
+    // --- Custom tip flow ---
+    function openCustom() {
+      customError.style.display = 'none';
+      customAmount.value = '';
+      show(customOverlay);
+      // iOS: focus slightly after animation
+      setTimeout(() => customAmount.focus(), 150);
+    }
+
+    function closeCustom() {
+      hide(customOverlay);
+      customAmount.blur();
+    }
+
+    customTipBtn.addEventListener('click', openCustom);
+    customTipBtn.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openCustom();
+      }
+    });
+
+    cancelCustom.addEventListener('click', closeCustom);
+
+    acceptCustom.addEventListener('click', () => {
+      const raw = String(customAmount.value ?? '').trim();
+      const val = Number(raw);
+      const valid = Number.isFinite(val) && val > 0;
+
+      if (!valid) {
+        customError.style.display = 'block';
+        customAmount.focus();
+        return;
+      }
+
+      closeCustom();
+      clearSelection();
+      openWaiting(val, 'Custom');
+    });
+
+    // Tap outside sheet to close (optional)
+    customOverlay.addEventListener('click', (e) => {
+      if (e.target === customOverlay) closeCustom();
+    });
+
+    // Tapping outside the waiting sheet closes + resets
+    waitOverlay.addEventListener('click', (e) => {
+      if (e.target === waitOverlay) closeWaitAndReset();
+    });
+
+    cancelWait.addEventListener('click', closeWaitAndReset);
+
+    // ESC closes overlays (helpful for desktop testing)
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeCustom();
+        closeWaitAndReset();
+      }
+    });
+
+    // --- Hidden demo shortcut: rapid-tap status card to force success ---
+    // 5 taps within 1.2s triggers the success state immediately.
+    let tapCount = 0;
+    let tapTimer;
+    statusCard.addEventListener('click', () => {
+      tapCount += 1;
+      clearTimeout(tapTimer);
+      tapTimer = setTimeout(() => (tapCount = 0), 1200);
+      if (tapCount >= 5) {
+        tapCount = 0;
+        showSuccessAndAutoClose();
+      }
+    });
+  </script>
+
+</body>
+</html>
