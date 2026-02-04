@@ -70,14 +70,14 @@
       box-shadow: 0 0 0 3px rgba(42, 166, 214, 0.15);
     }
 
-    .tip-percent {
+    .tip-value {
       color: var(--primary);
       font-size: 28px;
-      font-weight: 600;
+      font-weight: 700;
       margin-bottom: 6px;
     }
 
-    .tip-amount {
+    .tip-caption {
       color: var(--text-muted);
       font-size: 15px;
     }
@@ -92,7 +92,7 @@
       color: var(--primary);
       cursor: pointer;
       user-select: none;
-      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+      transition: transform 0.15s ease;
     }
 
     .custom-tip:active {
@@ -214,22 +214,22 @@
       color: #222;
     }
 
-    /* --- Waiting screen (merchant device) --- */
-    .wait-row {
+    /* --- Waiting + Thank content --- */
+    .sheet-content {
       display: grid;
-      gap: 14px;
+      gap: 18px;
       text-align: center;
-      padding: 16px;
+      padding: 22px 16px 18px;
     }
 
-    .wait-amount {
+    .amount {
       font-size: 28px;
-      font-weight: 700;
+      font-weight: 800;
       color: #111;
       letter-spacing: -0.2px;
     }
 
-    .wait-label {
+    .amount-label {
       margin-top: -6px;
       font-size: 13px;
       color: var(--text-muted);
@@ -239,7 +239,7 @@
       display: grid;
       justify-items: center;
       gap: 10px;
-      padding: 14px 12px;
+      padding: 16px 12px;
       border-radius: 14px;
       background: rgba(0, 0, 0, 0.04);
       user-select: none;
@@ -247,7 +247,7 @@
 
     .status-title {
       font-size: 16px;
-      font-weight: 700;
+      font-weight: 800;
       color: #111;
     }
 
@@ -255,7 +255,7 @@
       font-size: 13px;
       color: var(--text-muted);
       line-height: 1.35;
-      max-width: 30ch;
+      max-width: 32ch;
     }
 
     .pulse {
@@ -297,10 +297,11 @@
       font-size: 14px;
     }
 
-    /* --- Success check animation --- */
+    /* --- Success badge + animated check --- */
     .success-badge {
-      width: 56px;
-      height: 56px;
+      margin: 0 auto;
+      width: 72px;
+      height: 72px;
       border-radius: 50%;
       background: rgba(40, 167, 69, 0.14);
       display: none;
@@ -314,19 +315,19 @@
     }
 
     .check {
-      width: 30px;
-      height: 24px;
+      width: 34px;
+      height: 26px;
     }
 
     .check path {
       stroke: var(--success);
-      stroke-width: 4.5;
+      stroke-width: 4.8;
       fill: none;
       stroke-linecap: round;
       stroke-linejoin: round;
       stroke-dasharray: 60;
       stroke-dashoffset: 60;
-      animation: draw 420ms ease-out forwards;
+      animation: draw 460ms ease-out forwards;
     }
 
     @keyframes draw {
@@ -337,42 +338,40 @@
       color: #0f6b28;
     }
 
+    /* Thank-you specific spacing */
+    .thank-message {
+      font-size: 18px;
+      font-weight: 800;
+      color: #111;
+      margin-top: 2px;
+    }
+
     /* --- Responsive tweaks --- */
     @media (max-width: 375px) {
-      .tip-percent {
-        font-size: 24px;
-      }
-
-      .custom-tip {
-        font-size: 16px;
-      }
-
-      .wait-amount {
-        font-size: 26px;
-      }
+      .tip-value { font-size: 24px; }
+      .custom-tip { font-size: 16px; }
+      .amount { font-size: 26px; }
     }
 
     /* Prevent iOS input zoom by keeping >=16px font-size */
-    input, button {
-      font-size: 16px;
-    }
+    input, button { font-size: 16px; }
   </style>
 </head>
 <body>
 
   <div class="container" role="application" aria-label="Tip selection">
     <div class="tip-grid" aria-label="Preset tip options">
-      <div class="tip-card" data-tip="2.45" data-label="15%" role="button" tabindex="0" aria-label="Tip 15 percent, 2 euros 45 cents">
-        <div class="tip-percent">25€</div>
-        <div class="tip-amount">&nbsp;</div>
+      <div class="tip-card" data-tip="25" data-label="€25" role="button" tabindex="0" aria-label="Tip 25 euros">
+        <div class="tip-value">€25</div>
+        <div class="tip-caption">Tip amount</div>
       </div>
-      <div class="tip-card" data-tip="3.26" data-label="20%" role="button" tabindex="0" aria-label="Tip 20 percent, 3 euros 26 cents">
-        <div class="tip-percent">50€</div>
-        <div class="tip-amount">&nbsp;</div>
+      <div class="tip-card" data-tip="50" data-label="€50" role="button" tabindex="0" aria-label="Tip 50 euros">
+        <div class="tip-value">€50</div>
+        <div class="tip-caption">Tip amount</div>
       </div>
-      <div class="tip-card" data-tip="4.08" data-label="25%" role="button" tabindex="0" aria-label="Tip 25 percent, 4 euros 8 cents">
-        <div class="tip-percent">100€</div>
-        <div class="tip-amount">&nbsp;</div>
+      <div class="tip-card" data-tip="100" data-label="€100" role="button" tabindex="0" aria-label="Tip 100 euros">
+        <div class="tip-value">€100</div>
+        <div class="tip-caption">Tip amount</div>
       </div>
     </div>
 
@@ -422,10 +421,10 @@
         <p class="sheet-sub" id="waitSub">Waiting for payer…</p>
       </div>
 
-      <div class="wait-row">
+      <div class="sheet-content">
         <div>
-          <div class="wait-amount" id="waitAmount">€0.00</div>
-          <div class="wait-label">Tip Amount</div>
+          <div class="amount" id="waitAmount">€0.00</div>
+          <div class="amount-label">Tip Amount</div>
         </div>
 
         <!-- Hidden demo shortcut: rapid-tap this status card 5x to force success -->
@@ -445,6 +444,25 @@
         </div>
 
         <button class="btn btn-secondary" id="cancelWait">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thank You Screen -->
+  <div class="overlay" id="thankOverlay" aria-hidden="true">
+    <div class="sheet" role="dialog" aria-modal="true" aria-label="Thank you">
+      <div class="sheet-header">
+        <p class="sheet-title">Thank you!</p>
+        <p class="sheet-sub">We really appreciate your tip</p>
+      </div>
+
+      <div class="sheet-content" style="padding: 30px 16px 26px;">
+        <div class="success-badge" id="thankBadge" style="display:grid" aria-hidden="true">
+          <svg class="check" viewBox="0 0 52 40" focusable="false" aria-hidden="true">
+            <path d="M6 22 L20 36 L46 6"></path>
+          </svg>
+        </div>
+        <div class="thank-message">Thanks for your generosity 💙</div>
       </div>
     </div>
   </div>
@@ -472,11 +490,14 @@
     const pulse = document.getElementById('pulse');
     const successBadge = document.getElementById('successBadge');
 
+    const thankOverlay = document.getElementById('thankOverlay');
+    const thankBadge = document.getElementById('thankBadge');
+
     const eur = new Intl.NumberFormat(undefined, {
       style: 'currency',
       currency: 'EUR',
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      maximumFractionDigits: 2
     });
 
     function moneyEUR(n) {
@@ -499,61 +520,94 @@
       tipCards.forEach(c => c.classList.remove('selected'));
     }
 
-    function resetWaitUI() {
-      statusCard.classList.remove('success');
-      statusTitle.textContent = 'Waiting for Apple Pay';
-      statusSub.textContent = 'Have the payer use Apple Pay on their device to approve.';
-      pulse.style.display = 'grid';
-      successBadge.style.display = 'none';
-
-      // Reset the SVG animation by replacing its contents (small + reliable)
-      successBadge.innerHTML = `
+    function resetSuccessBadge(el) {
+      // Reset SVG animation by replacing its contents
+      el.innerHTML = `
         <svg class="check" viewBox="0 0 52 40" focusable="false" aria-hidden="true">
           <path d="M6 22 L20 36 L46 6"></path>
         </svg>
       `;
     }
 
-    let waitTimer;
-    let closeTimer;
-
-    function closeWaitAndReset() {
-      clearTimeout(waitTimer);
-      clearTimeout(closeTimer);
-      hide(waitOverlay);
-      resetWaitUI();
-      clearSelection();
-      waitSub.textContent = 'Waiting for payer…';
-      // keep amount as-is; it will update next open
+    function resetWaitUI() {
+      statusCard.classList.remove('success');
+      statusTitle.textContent = 'Waiting for Apple Pay';
+      statusSub.textContent = 'Have the payer use Apple Pay on their device to approve.';
+      pulse.style.display = 'grid';
+      successBadge.style.display = 'none';
+      resetSuccessBadge(successBadge);
     }
 
-    function showSuccessAndAutoClose() {
+    function resetThankUI() {
+      resetSuccessBadge(thankBadge);
+    }
+
+    let waitTimer;
+    let successTimer;
+    let thankTimer;
+
+    function closeAllAndReset() {
       clearTimeout(waitTimer);
+      clearTimeout(successTimer);
+      clearTimeout(thankTimer);
+
+      hide(customOverlay);
+      hide(waitOverlay);
+      hide(thankOverlay);
+
+      resetWaitUI();
+      resetThankUI();
+      clearSelection();
+
+      waitSub.textContent = 'Waiting for payer…';
+    }
+
+    function showThankYou() {
+      resetThankUI();
+      show(thankOverlay);
+
+      // Auto-close thank-you and reset to start
+      clearTimeout(thankTimer);
+      thankTimer = setTimeout(() => {
+        hide(thankOverlay);
+        resetWaitUI();
+        clearSelection();
+      }, 4000);
+    }
+
+    function showSuccessThenThankYou() {
+      clearTimeout(waitTimer);
+
       statusCard.classList.add('success');
       pulse.style.display = 'none';
       successBadge.style.display = 'grid';
+      resetSuccessBadge(successBadge);
       statusTitle.textContent = 'Payment accepted';
       statusSub.textContent = 'The tip was successfully received.';
 
-      // Auto-close and reset back to tip selection
-      clearTimeout(closeTimer);
-      closeTimer = setTimeout(() => {
-        closeWaitAndReset();
-      }, 2200);
+      // Auto-close waiting screen, then show thank-you screen
+      clearTimeout(successTimer);
+      successTimer = setTimeout(() => {
+        hide(waitOverlay);
+        resetWaitUI();
+        showThankYou();
+      }, 2000);
     }
 
     function openWaiting(amount, label) {
       clearTimeout(waitTimer);
-      clearTimeout(closeTimer);
+      clearTimeout(successTimer);
+      clearTimeout(thankTimer);
 
       waitAmount.textContent = moneyEUR(amount);
       waitSub.textContent = label ? `Tip selected: ${label}` : 'Tip selected: Custom';
+
       resetWaitUI();
       show(waitOverlay);
 
-      // fake acceptance after a few seconds
+      // Fake acceptance after a few seconds
       waitTimer = setTimeout(() => {
-        showSuccessAndAutoClose();
+        showSuccessThenThankYou();
       }, 3200);
     }
 
@@ -581,7 +635,6 @@
       customError.style.display = 'none';
       customAmount.value = '';
       show(customOverlay);
-      // iOS: focus slightly after animation
       setTimeout(() => customAmount.focus(), 150);
     }
 
@@ -616,24 +669,24 @@
       openWaiting(val, 'Custom');
     });
 
-    // Tap outside sheet to close (optional)
+    // Tap outside custom sheet to close (optional)
     customOverlay.addEventListener('click', (e) => {
       if (e.target === customOverlay) closeCustom();
     });
 
-    // Tapping outside the waiting sheet closes + resets
+    // Tapping outside wait/thank sheets closes + resets
     waitOverlay.addEventListener('click', (e) => {
-      if (e.target === waitOverlay) closeWaitAndReset();
+      if (e.target === waitOverlay) closeAllAndReset();
+    });
+    thankOverlay.addEventListener('click', (e) => {
+      if (e.target === thankOverlay) closeAllAndReset();
     });
 
-    cancelWait.addEventListener('click', closeWaitAndReset);
+    cancelWait.addEventListener('click', closeAllAndReset);
 
     // ESC closes overlays (helpful for desktop testing)
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closeCustom();
-        closeWaitAndReset();
-      }
+      if (e.key === 'Escape') closeAllAndReset();
     });
 
     // --- Hidden demo shortcut: rapid-tap status card to force success ---
@@ -646,10 +699,26 @@
       tapTimer = setTimeout(() => (tapCount = 0), 1200);
       if (tapCount >= 5) {
         tapCount = 0;
-        showSuccessAndAutoClose();
+        showSuccessThenThankYou();
       }
     });
-  </script>
 
+    // --- Lightweight self-tests (run once; safe in prod; logs only) ---
+    (function runSelfTests() {
+      try {
+        console.assert(!!customTipBtn, 'customTipBtn missing');
+        console.assert(!!customOverlay && !!waitOverlay && !!thankOverlay, 'overlay missing');
+        console.assert(!!waitAmount && !!statusCard && !!statusTitle && !!pulse && !!successBadge, 'wait UI elements missing');
+        console.assert(moneyEUR(0).includes('€') || moneyEUR(0).includes('EUR'), 'EUR formatter unexpected');
+        console.assert(moneyEUR(12.3).length > 0, 'moneyEUR should format');
+        // basic smoke test: ensure openWaiting does not throw
+        openWaiting(25, '€25');
+        closeAllAndReset();
+        console.assert(!waitOverlay.classList.contains('show'), 'waitOverlay should be hidden after reset');
+      } catch (err) {
+        console.warn('Self-tests failed:', err);
+      }
+    })();
+  </script>
 </body>
 </html>
